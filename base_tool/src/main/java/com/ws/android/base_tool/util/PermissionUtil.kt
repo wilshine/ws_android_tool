@@ -5,19 +5,93 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.ActivityResultLauncher
+import androidx.appcompat.app.AppCompatActivity
 
 /**
  * 权限管理工具类
  */
 object PermissionUtil {
+    private const val PERMISSION_REQUEST_CODE = 100
+    private var permissionLauncher: ActivityResultLauncher<Array<String>>? = null
+    private var permissionCallback: PermissionCallback? = null
+
+    /**
+     * 权限请求回调接口
+     */
+    interface PermissionCallback {
+        fun onGranted(permissions: List<String>)
+        fun onDenied(permissions: List<String>)
+        fun onPermanentlyDenied(permissions: List<String>)
+    }
+
+    /**
+     * 初始化权限管理器（在Activity的onCreate中调用）
+     * @param activity AppCompatActivity对象
+     */
+    fun init(activity: AppCompatActivity) {
+        permissionLauncher = activity.registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        ) { results ->
+            handlePermissionResult(activity, results)
+        }
+    }
+
+    /**
+     * 请求权限
+     * @param activity Activity对象
+     * @param permissions 要请求的权限列表
+     * @param callback 权限请求回调
+     */
+    fun request(
+        activity: Activity,
+        permissions: Array<String>,
+        callback: PermissionCallback
+    ) {
+        permissionCallback = callback
+        when {
+            areGranted(activity, permissions) -> {
+                callback.onGranted(permissions.toList())
+            }
+            shouldShowAnyRationale(activity, permissions) -> {
+                callback.onDenied(permissions.filter { shouldShowRationale(activity, it) })
+            }
+            else -> {
+                permissionLauncher?.launch(permissions) ?: throw IllegalStateException(
+                    "PermissionUtil not initialized. Call init() first in your Activity's onCreate."
+                )
+            }
+        }
+    }
+
+    private fun handlePermissionResult(
+        activity: Activity,
+        results: Map<String, Boolean>
+    ) {
+        val granted = mutableListOf<String>()
+        val denied = mutableListOf<String>()
+        val permanentlyDenied = mutableListOf<String>()
+
+        results.forEach { (permission, isGranted) ->
+            when {
+                isGranted -> granted.add(permission)
+                isPermanentlyDenied(activity, permission) -> permanentlyDenied.add(permission)
+                else -> denied.add(permission)
+            }
+        }
+
+        permissionCallback?.let {
+            if (granted.isNotEmpty()) it.onGranted(granted)
+            if (denied.isNotEmpty()) it.onDenied(denied)
+            if (permanentlyDenied.isNotEmpty()) it.onPermanentlyDenied(permanentlyDenied)
+        }
+    }
+
     /**
      * 检查是否已经授予权限
      * @param context Context对象
@@ -50,52 +124,6 @@ object PermissionUtil {
     fun isPermanentlyDenied(activity: Activity, permission: String): Boolean {
         return !isGranted(activity, permission) &&
                 !ActivityCompat.shouldShowRequestPermissionRationale(activity, permission)
-    }
-
-    /**
-     * 在Activity中注册权限请求
-     * @param activity AppCompatActivity对象
-     * @param onResult 权限请求结果回调
-     * @return ActivityResultLauncher对象
-     */
-    fun registerForActivity(
-        activity: AppCompatActivity,
-        onResult: (Map<String, Boolean>) -> Unit
-    ): ActivityResultLauncher<Array<String>> {
-        return activity.registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            onResult(permissions)
-        }
-    }
-
-    /**
-     * 在Fragment中注册权限请求
-     * @param fragment Fragment对象
-     * @param onResult 权限请求结果回调
-     * @return ActivityResultLauncher对象
-     */
-    fun registerForFragment(
-        fragment: Fragment,
-        onResult: (Map<String, Boolean>) -> Unit
-    ): ActivityResultLauncher<Array<String>> {
-        return fragment.registerForActivityResult(
-            ActivityResultContracts.RequestMultiplePermissions()
-        ) { permissions ->
-            onResult(permissions)
-        }
-    }
-
-    /**
-     * 请求权限
-     * @param launcher ActivityResultLauncher对象
-     * @param permissions 要请求的权限列表
-     */
-    fun request(launcher: ActivityResultLauncher<Array<String>>, vararg permissions: String) {
-//        val permissionArray: Array<String> = Array(permissions.size) { i -> permissions[i] }
-//        launcher.launch(permissionArray)
-        launcher.launch(permissions.toList().toTypedArray())
-
     }
 
     /**
