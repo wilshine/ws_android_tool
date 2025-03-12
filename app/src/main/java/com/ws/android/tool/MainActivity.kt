@@ -2,6 +2,7 @@ package com.ws.android.tool
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +29,12 @@ class MainActivity : AppCompatActivity() {
         updatePermissionStatus()
 
         testDeviceUtil()
+
+        binding.apply {
+            btnRecord.setOnClickListener {
+                startActivity(Intent(this@MainActivity, RecordActivity::class.java))
+            }
+        }
     }
 
     fun testDeviceUtil() {

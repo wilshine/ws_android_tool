@@ -14,7 +14,24 @@
 
 ## 权限管理
 
+- [PermissionUtil]
 
+```java
+
+// 检查权限
+fun isGranted(context: Context, permission: String): Boolean {}
+
+// 请求权限
+fun request(
+        activity: Activity,
+        permissions: Array<String>,
+        callback: PermissionCallback) {}
+
+
+
+```
+
+可以参考：[https://github.com/getActivity/XXPermissions](https://github.com/getActivity/XXPermissions)
 
 ## MMKV
 
@@ -22,3 +39,20 @@ MMKV 是基于 mmap 内存映射的 key-value 组件，底层序列化/反序列
 如果是小项目直接使用SharedPreferences就可以了。
 
 - [https://github.com/Tencent/MMKV](https://github.com/Tencent/MMKV)
+
+
+## 网络请求
+
+一般常见的功能：
+
+- 基本的请求get、post
+- 接口的响应数据直接转换成对应实体类或返回json对象
+- 拦截器设置，配置自定义Headers
+
+
+
+## 音频播放、录音
+
+音视频库统一使用官方的media3
+
+##
