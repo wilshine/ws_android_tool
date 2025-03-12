@@ -1,6 +1,8 @@
 package com.ws.android.base_tool.util
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.media.MediaRecorder
 import android.os.Build
 import java.io.File
@@ -46,6 +48,51 @@ class AudioRecordManager private constructor() {
     fun setListener(listener: AudioRecordListener) {
         this.listener = listener
     }
+
+    // Add to AudioRecordManager class
+    private var isBackgroundRecording = false
+
+    // Method to start background recording
+    fun startBackgroundRecording(
+        context: Context,
+        outputDir: File,
+        pendingIntent: PendingIntent? = null,
+        config: RecordConfig = RecordConfig()
+    ): String? {
+        val filePath = startRecording(context, outputDir, config)
+
+        if (filePath != null) {
+            isBackgroundRecording = true
+            val serviceIntent = Intent(context, AudioRecordService::class.java).apply {
+                action = "START_RECORDING"
+                if (pendingIntent != null) {
+                    putExtra("pending_intent", pendingIntent)
+                }
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent)
+            } else {
+                context.startService(serviceIntent)
+            }
+        }
+
+        return filePath
+    }
+
+    // Method to stop background recording
+    fun stopBackgroundRecording(context: Context): String? {
+        if (isBackgroundRecording) {
+            val serviceIntent = Intent(context, AudioRecordService::class.java).apply {
+                action = "STOP_RECORDING"
+            }
+            context.startService(serviceIntent)
+            isBackgroundRecording = false
+        }
+
+        return stopRecording()
+    }
+
 
     /**
      * 开始录音
