@@ -5,11 +5,14 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.os.RemoteException
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ws.android.server.IRemoteService
+import com.ws.android.server.model.Student
 
 class MainActivity : AppCompatActivity() {
     private val TAG = "ClientMainActivity"
@@ -47,6 +50,25 @@ class MainActivity : AppCompatActivity() {
 
         btnUnbind.setOnClickListener {
             unbindRemoteService()
+        }
+
+        findViewById<Button>(R.id.btnGetStudent).setOnClickListener {
+            try {
+                val student = Student().apply {
+                    name = "张三"
+                    age = 10
+                    grade = "Grade 5"
+                }
+                val updatedStudent = remoteService?.getStudentInfo(12, student)
+                updatedStudent?.let {
+                    Toast.makeText(
+                        this, "更新后的学生信息：${student.name}, ${student.age}岁, ${student.grade}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: RemoteException) {
+                e.printStackTrace()
+            }
         }
 
         btnAdd.setOnClickListener {

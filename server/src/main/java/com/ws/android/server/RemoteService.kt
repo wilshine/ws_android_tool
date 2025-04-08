@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.util.Log
+import com.ws.android.server.model.Student
 
 /**
  * AIDL方法的具体实现
@@ -20,6 +21,16 @@ class RemoteService : Service() {
 
         override fun getMessage(): String {
             return "Hello from RemoteService!"
+        }
+
+        override fun getStudentInfo(age: Int, student: Student): Student {
+            // 处理接收到的Student对象
+            Log.d(TAG, "Received student: name=${student.name}, age=${student.age}, grade=${student.grade}")
+            // 修改学生信息
+            student.age = age
+            student.grade = "Grade ${age/6 + 1}"
+            Log.d(TAG, "Updated student: name=${student.name}, age=${student.age}, grade=${student.grade}")
+            return student
         }
     }
 

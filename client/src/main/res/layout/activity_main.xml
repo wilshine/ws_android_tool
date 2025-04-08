@@ -22,16 +22,16 @@
             android:id="@+id/btnBind"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginEnd="8dp"
+            android:layout_weight="1"
             android:text="绑定服务" />
 
         <Button
             android:id="@+id/btnUnbind"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginStart="8dp"
+            android:layout_weight="1"
             android:text="解绑服务" />
     </LinearLayout>
 
@@ -48,6 +48,13 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="获取远程消息" />
+
+    <Button
+        android:id="@+id/btnGetStudent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="修改Student年龄" />
 
     <TextView
         android:id="@+id/tvResult"
