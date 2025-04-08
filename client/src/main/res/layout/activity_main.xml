@@ -64,4 +64,11 @@
         android:text="结果将显示在这里"
         android:textSize="16sp" />
 
+    <Button
+        android:id="@+id/btnMessenger"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Messenger Example" />
+
 </LinearLayout>

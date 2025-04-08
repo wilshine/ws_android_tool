@@ -98,6 +98,12 @@ class MainActivity : AppCompatActivity() {
                 updateResult("服务未连接")
             }
         }
+
+        findViewById<Button>(R.id.btnMessenger).setOnClickListener {
+            Intent(this, MessengerExampleActivity::class.java).also { intent ->
+                startActivity(intent)
+            }
+        }
     }
 
     private fun bindRemoteService() {
