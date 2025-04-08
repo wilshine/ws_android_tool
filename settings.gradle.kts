@@ -22,3 +22,5 @@ dependencyResolutionManagement {
 rootProject.name = "ws_android_tool"
 include(":app")
 include(":base_tool")
+include(":client")
+include(":server")
