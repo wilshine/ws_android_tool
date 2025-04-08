@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.ws.android.server.IRemoteService
+import com.ws.android.server.model.RemoteCallback
 import com.ws.android.server.model.Student
 
 class MainActivity : AppCompatActivity() {
@@ -19,12 +20,29 @@ class MainActivity : AppCompatActivity() {
     private var remoteService: IRemoteService? = null
     private var isBound = false
 
+    /**
+     * 远程回调的实现
+     */
+    val callback: RemoteCallback.Stub = object : RemoteCallback.Stub() {
+        override fun onCallback(student: Student?) {
+            Log.d(TAG, "Received student: ${student?.name}, ${student?.age}岁, ${student?.grade}")
+            runOnUiThread {
+                Toast.makeText(
+                    this@MainActivity,
+                    "服务端回调：${student?.name}, ${student?.age}岁, ${student?.grade}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
             remoteService = IRemoteService.Stub.asInterface(service)
             isBound = true
             Log.d(TAG, "Service Connected")
             updateServiceStatus("服务已连接")
+            remoteService?.register(callback)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {

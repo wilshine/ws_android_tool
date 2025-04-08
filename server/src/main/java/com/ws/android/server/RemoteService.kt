@@ -5,12 +5,15 @@ import android.content.Intent
 import android.os.IBinder
 import android.util.Log
 import com.ws.android.server.model.Student
+import com.ws.android.server.model.RemoteCallback
 
 /**
  * AIDL方法的具体实现
  */
 class RemoteService : Service() {
     private val TAG = "RemoteService"
+
+    var remoteCallback: RemoteCallback? = null
 
     // 创建Binder对象实现AIDL接口
     private val binder = object : IRemoteService.Stub() {
@@ -28,10 +31,23 @@ class RemoteService : Service() {
             Log.d(TAG, "Received student: name=${student.name}, age=${student.age}, grade=${student.grade}")
             // 修改学生信息
             student.age = age
-            student.grade = "Grade ${age/6 + 1}"
+            student.grade = "Grade ${age / 6 + 1}"
             Log.d(TAG, "Updated student: name=${student.name}, age=${student.age}, grade=${student.grade}")
             return student
         }
+
+        override fun register(callback: RemoteCallback) {
+            remoteCallback = callback
+        }
+
+        override fun changeScore() {
+            val student = Student()
+            student.name = "Student ${System.currentTimeMillis()}"
+            student.age = 6 + (Math.random() * 12).toInt()
+            student.grade = "Grade ${student.age / 6 + 1}"
+            remoteCallback?.onCallback(student)
+        }
+
     }
 
     override fun onBind(intent: Intent): IBinder {
