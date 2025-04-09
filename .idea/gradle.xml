@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/base_tool" />
             <option value="$PROJECT_DIR$/client" />
+            <option value="$PROJECT_DIR$/samples-apidemos" />
             <option value="$PROJECT_DIR$/server" />
           </set>
         </option>
